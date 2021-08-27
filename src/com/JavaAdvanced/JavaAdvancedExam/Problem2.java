@@ -3,118 +3,98 @@ package com.JavaAdvanced.JavaAdvancedExam;
 import java.util.*;
 
 public class Problem2 {
-    static int pythonLength = 1;
-    static int foodCount = 0;
-
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-
         int sizeOfMatrix = Integer.parseInt(scanner.nextLine());
+        int commandsCount = Integer.parseInt(scanner.nextLine());
 
-        String[] commands = scanner.nextLine().split(", ");
-
+        //матрица от символи:
         char[][] matrix = new char[sizeOfMatrix][sizeOfMatrix];
 
-        int[] playerPosition = new int[2];
+        //index 0 - the row of the player.
+        //index 1 - the column.
+        int[] position = new int[2];
 
         for (int row = 0; row < sizeOfMatrix; row++) {
-            String[] line = scanner.nextLine().split("\\s+");
-            for (int col = 0; col < matrix[row].length; col++) {
-                matrix[row][col] = line[col].charAt(0);
+            String line = scanner.nextLine();
+            matrix[row] = line.toCharArray();
 
-                if (matrix[row][col] == 's') {
-                    playerPosition[0] = row;
-                    playerPosition[1] = col;
-                }
-
-                if (matrix[row][col] == 'f') {
-                    foodCount++;
-                }
+            if (line.contains("P")) {
+                position[0] = row; // Реда на който се намира играча.
+                position[1] = line.indexOf("P"); // Колоната е там, където се намира играча.
             }
         }
 
 
-        boolean gameIsUnfinished = true;
-
-        for (int i = 0; i < commands.length; i++) {
-
-            String command = commands[i];
-
-            while (gameIsUnfinished && foodCount > 0) {
-
-                if (command.equals("up")) {
-
-                    gameIsUnfinished = movePython(playerPosition, matrix, -1, 0);
-                    break;
-                } else if (command.equals("down")) {
-                    gameIsUnfinished = movePython(playerPosition, matrix, +1, 0);
-                    break;
-                } else if (command.equals("left")) {
-                    gameIsUnfinished = movePython(playerPosition, matrix, 0, -1);
-                    break;
-                } else if (command.equals("right")) {
-                    gameIsUnfinished = movePython(playerPosition, matrix, 0, +1);
-                    break;
-                }
-
-            }
-            if (foodCount == 0) {
-                System.out.printf("You win! Final python length is %d%n", pythonLength);
-                break;
+        boolean playerWon = false;
+        while (commandsCount-- > 0 && !playerWon) {
+            String command = scanner.nextLine();
+            if (command.equals("up")) {
+                playerWon = movePlayer(position, matrix, -1, 0);
+            } else if (command.equals("down")) {
+                playerWon = movePlayer(position, matrix, +1, 0);
+            } else if (command.equals("left")) {
+                playerWon = movePlayer(position, matrix, 0, -1);
+            } else if (command.equals("right")) {
+                playerWon = movePlayer(position, matrix, 0, +1);
             }
         }
 
-        if (foodCount > 0 && gameIsUnfinished) {
-            System.out.printf("You lose! There is still %d food to be eaten.", foodCount);
+        if (playerWon) {
+            System.out.println("Well done, the player won first place!");
+        } else {
+            System.out.println("Oh no, the player got lost on the track!");
         }
-
+        printMatrix(matrix);
     }
 
-    public static void print(char[][] matrix, int size) {
-        for (int row = 0; row < size; row++) {
-            for (int col = 0; col < size; col++) {
-                System.out.print(matrix[row][col] + " ");
+    private static boolean movePlayer(int[] position, char[][] matrix, int rowModification, int colModification) {
+        //UP: row - 1
+        //DOWN:  row + 1
+        //LEFT: col - 1
+        //RIGHT: col + 1
+        int row = position[0];
+        int col = position[1];
+        int newRow = indexIsInBounds(row + rowModification, matrix.length);
+        int newCol = indexIsInBounds(col + colModification, matrix.length);
+
+        boolean hasWon = false;
+
+        if (matrix[newRow][newCol] == 'F') {
+            hasWon = true;
+        } else if (matrix[newRow][newCol] == 'B') {
+            newRow = indexIsInBounds(newRow + rowModification, matrix.length);
+            newCol = indexIsInBounds(newCol + colModification, matrix.length);
+            if (matrix[newRow][newCol] == 'F') {
+                hasWon = true;
             }
-            System.out.println();
-        }
-    }
-
-    public static boolean movePython(int[] playerPosition, char[][] matrix, int rowModifier, int colModifier) {
-
-        int row = playerPosition[0];
-        int col = playerPosition[1];
-
-        matrix[row][col] = '*';
-
-        int newRol = indexIsInBounds(row + rowModifier, matrix.length);
-        int newCol = indexIsInBounds(col + colModifier, matrix.length);
-
-        char currentSymbol = matrix[newRol][newCol];
-
-        if (currentSymbol == 'f') {
-            matrix[newRol][newCol] = '*';
-            pythonLength++;
-            foodCount--;
-        } else if (currentSymbol == 'e') {
-            System.out.println("You lose! Killed by an enemy!");
-            return false;
+        } else if (matrix[newRow][newCol] == 'T') {
+            newRow = row;
+            newCol = col;
         }
 
-        matrix[newRol][newCol] = 's';
-        playerPosition[0] = newRol;
-        playerPosition[1] = newCol;
-
-        return true;
-
+        matrix[row][col] = '.';
+        matrix[newRow][newCol] = 'P';
+        position[0] = newRow;
+        position[1] = newCol;
+        return hasWon;
     }
 
-    private static int indexIsInBounds(int index, int matrixLength) {
+    private static int indexIsInBounds(int index, int matrixBounds) {
         if (index < 0) {
-            index = matrixLength - 1;
-        } else if (index >= matrixLength) {
+            index = matrixBounds - 1;
+        } else if (index >= matrixBounds) {
             index = 0;
         }
         return index;
     }
-}
 
+    private static void printMatrix(char[][] matrix) {
+        for (char[] array : matrix) {
+            for (char symbol : array) {
+                System.out.print(symbol);
+            }
+            System.out.println();
+        }
+    }
+}

@@ -3,36 +3,38 @@ package com.JavaAdvanced.ExamPreparation;
 import java.util.*;
 
 public class Snake {
+
+    static int countOfFood = 0;
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         char[][] territory = readMatrix(scanner, Integer.parseInt(scanner.nextLine()));
-        int countOfFood = 0;
-        int[] currentPosition = findIndexes(territory, 'S');
+
+        int[] playerPosition = findIndexes(territory, 'S');
 
         while (countOfFood < 10) {
             String input = scanner.nextLine();
-            territory[currentPosition[0]][currentPosition[1]] = '.';
+            territory[playerPosition[0]][playerPosition[1]] = '.';
             switch (input) {
                 case "up":
-                    currentPosition[0]--;
+                    playerPosition[0]--;
                     break;
                 case "down":
-                    currentPosition[0]++;
+                    playerPosition[0]++;
                     break;
                 case "left":
-                    currentPosition[1]--;
+                    playerPosition[1]--;
                     break;
                 case "right":
-                    currentPosition[1]++;
+                    playerPosition[1]++;
                     break;
             }
-            if (indexIsInTerritory(currentPosition, territory)) {
-                if (territory[currentPosition[0]][currentPosition[1]] == '*') {
+            if (indexIsInTerritory(playerPosition, territory)) {
+                if (territory[playerPosition[0]][playerPosition[1]] == '*') {
                     countOfFood++;
-                    territory[currentPosition[0]][currentPosition[1]] = 'S';
-                } else if (territory[currentPosition[0]][currentPosition[1]] == 'B') {
-                    territory[currentPosition[0]][currentPosition[1]] = '.';
-                    currentPosition = findIndexes(territory, 'B');
+                    territory[playerPosition[0]][playerPosition[1]] = 'S';
+                } else if (territory[playerPosition[0]][playerPosition[1]] == 'B') {
+                    territory[playerPosition[0]][playerPosition[1]] = '.';
+                    playerPosition = findIndexes(territory, 'B');
                 }
             } else {
                 break;

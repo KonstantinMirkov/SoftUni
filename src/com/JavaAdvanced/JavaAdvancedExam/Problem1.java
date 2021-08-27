@@ -1,52 +1,85 @@
 package com.JavaAdvanced.JavaAdvancedExam;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class Problem1 {
+    //public static int biscuit = 25, cake = 50, pastry = 75, pie = 100;
+
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        //Стек:
-        Deque<Integer> tasks = new ArrayDeque<>();
-        Arrays.stream(scanner.nextLine().split(", "))
-                .map(Integer::parseInt)
-                .forEach(tasks::push);
-        //Опашка:
-        Deque<Integer> threads = Arrays.stream(scanner.nextLine().split("\\s+"))
-                .map(Integer::parseInt)
-                .collect(Collectors.toCollection(ArrayDeque::new));
-
-        int valueOfTheTask = Integer.parseInt(scanner.nextLine());
-
-        while (!tasks.isEmpty() && !threads.isEmpty() && valueOfTheTask != 0) {
-
-            int lastTask = tasks.peek();
-            int firstThread = threads.peek();
+        int[] liquids = implementArray(scanner);
+        int[] ingredients = implementArray(scanner);
 
 
-            if (lastTask <= firstThread) {
-                if (valueOfTheTask == lastTask) {
-                    System.out.printf("Thread with value %d killed task %d", firstThread, valueOfTheTask);
-                    valueOfTheTask = 0;
-                } else {
-                    tasks.pop(); // премахвам от върха на стека
-                    threads.poll(); // премахвам от края на опашката
-                }
+        ArrayDeque<Integer> ingredientDeque = new ArrayDeque<>();
+        Arrays.stream(ingredients).forEach(ingredientDeque::push);
+
+        ArrayDeque<Integer> liquidDeque = new ArrayDeque<>();
+        Arrays.stream(liquids).forEach(liquidDeque::offer);
+
+
+        Map<String, Integer> productValues = new LinkedHashMap<>();
+        productValues.put("Biscuit", 0);
+        productValues.put("Cake", 0);
+        productValues.put("Pie", 0);
+        productValues.put("Pastry", 0);
+
+        while (!liquidDeque.isEmpty() && !ingredientDeque.isEmpty()) {
+            int liquidOne = liquidDeque.poll();
+            int lastIngredientLast = ingredientDeque.pop();
+
+            int sum = liquidOne + lastIngredientLast;
+
+            int countOfFoods;
+            String foodName;
+            if (sum == 25) {
+                foodName = "Biscuit";
+                countOfFoods = productValues.get(foodName);
+                productValues.put(foodName, countOfFoods + 1);
+            } else if (sum == 50) {
+                foodName = "Cake";
+                countOfFoods = productValues.get(foodName);
+                productValues.put(foodName, countOfFoods + 1);
+            } else if (sum == 75) {
+                foodName = "Pie";
+                countOfFoods = productValues.get(foodName);
+                productValues.put(foodName, countOfFoods + 1);
+            } else if (sum == 100) {
+                foodName = "Pastry";
+                countOfFoods = productValues.get(foodName);
+                productValues.put(foodName, countOfFoods + 1);
             } else {
-                if (valueOfTheTask == lastTask) {
-                    System.out.printf("Thread with value %d killed task %d", firstThread, valueOfTheTask);
-                    valueOfTheTask = 0;
-                } else {
-                    threads.poll(); // премахвам от края на опашката
-                }
+                lastIngredientLast += 3;
+                ingredientDeque.push(lastIngredientLast);
             }
         }
-        System.out.println();
 
-        while (!threads.isEmpty()) {
-            System.out.print(threads.peek() + " ");
-            threads.remove();
+
+        if (productValues.containsValue(0)) {
+            System.out.println("What a pity! You didn't have enough materials to cook everything.");
+        } else {
+            System.out.println("Great! You succeeded in cooking all the food!");
         }
+
+        if (liquidDeque.isEmpty()) {
+            System.out.println("Liquids left: none");
+        } else {
+            System.out.println("Liquids left: " + String.join(", ", String.valueOf(liquidDeque)
+                    .replaceAll("[\\[\\]]", "")));
+        }
+
+        if (ingredientDeque.isEmpty()) {
+            System.out.println("Ingredients left: none");
+        } else {
+            System.out.println("Ingredients left: "+ String.join(", ", String.valueOf(ingredientDeque)
+                    .replaceAll("[\\[\\]]", "")));
+        }
+
+
+        productValues.forEach((foodsName, count) -> System.out.printf("%s: %d%n", foodsName, count));
     }
 
+    private static int[] implementArray(Scanner scanner) {
+        return Arrays.stream(scanner.nextLine().split("\\s")).mapToInt(Integer::parseInt).toArray();
+    }
 }
